@@ -436,7 +436,18 @@ indeed the case.
 <!-- ********************************************************** -->
 
 <h2> Collective Communication</h2>
+<ul>
+<li>
+<p>
+Using <tt><b>MPI_Barrier</b></tt>, modify the second 'Hello World' code so 
+that the output is printed out in order (i.e. 0, 1, 2, 3, ...).  Use the 
+function call <tt><b>sleep(1)</b></tt> to pause for one second between each 
+line of 
+output.  Test your solution by running the executable multiple times on a 
+large number of processes.
+</p>
 
+<li>
 <p>
 Write an MPI program in which an arbitrary number of processes (specified 
 by <tt><b>-n</b></tt>) are used to calculate the sum &sum;1/k<sup>2</sup> 
@@ -449,15 +460,8 @@ the correctness of your program by confirming that the result is independent
 of the number of processes.
 </p>
 
-<p>
-Using <tt><b>MPI_Barrier</b></tt>, modify the second 'Hello World' code so 
-that the output is printed out in order (i.e. 0, 1, 2, 3, ...).  Use the 
-function call <tt><b>sleep(1)</b></tt> to pause for one second between each 
-line of 
-output.  Test your solution by running the executable multiple times on a 
-large number of processes.
-</p>
 
+<!--
 <p>
 Benchmark the scaling behaviour of <tt><b>MPI_Bcast</b></tt> as a function 
 of the number of processes, <em>N</em>, where <em>N</em> is 2, 4, 8 and 16.  
@@ -473,6 +477,8 @@ Perform a 'sweetspot' calculation in which you determine the critical
 size of a message below which <tt><b>MPI_Bcast</b></tt> becomes more
 efficient than <tt><b>MPI_Scatter</b></tt>. 
 
+-->
+
 <!--Vary both the number of
 processes and the message size, and compare your answer to the 
 theoretical expressions given in Slide 38. Using the latency and bandwidth
@@ -481,6 +487,36 @@ values from above, plot the two theoretical expressions using
 timings.-->
 </p>
 
+
+<!--<h2>Bonus exercise</h2>
+<p>
+Here is one last problem to keep you going if you finish all of the above
+before the end of the workshop. If you don't get to look at this in class please
+consider giving it a go before next workshop!
+
+<br>
+-->
+<li>
+<p>
+Write an MPI program to calculate the dot product between two vectors using many processes.
+Your program should do the following:
+<ol>
+  <li> Allocate two large arrays <b>x</b> and <b>y</b> (same size).
+  <li> On rank 0 only, populate them with values and calculate their dot product.
+  <li> <b>Scatter</b> both arrays across all MPI ranks. 
+      You may find it easiest to hard-code the <b>count</b> (something large) and then let the size
+      of the arrays be <b>count</b>*<b>nprocs</b>.
+  <li> Each rank should receive a part of the two arrays, you may like to call them <b>xpart</b> and
+    <b>ypart</b>. Have each rank calculate the dot product of <b>xpart</b> and <b>ypart</b>, and
+    store the result in a variable <b>dotpart</b>
+  <li> Use MPI_Reduce to gather each rank's <b>dotpart</b>, summing them together into a variable
+    <b>dot</b> on rank 0.
+  <li> Verify that <b>dot</b> as calculated via MPI_Scatter/Reduce is the same as the dot product
+    you initially calculated on rank 0 alone.
+</ol>
+
+</p>
+</ul>
 <!-- ********************************************************** -->
 
 <h2>Further Information</h2>
