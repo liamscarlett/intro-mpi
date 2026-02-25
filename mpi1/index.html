@@ -1,0 +1,542 @@
+<html>
+<body>
+
+<head>
+   <title>High-Performance Computing - MPI</title>
+   <LINK REL=STYLESHEET TYPE="TEXT/CSS" HREF="style.css">
+</head>
+
+<h1>HPC: First MPI Laboratory</h1>
+
+<!-- ********************************************************** -->
+
+<h2>Initial Setup</h2>
+
+<p>
+Today you will learn how to compile, edit and run MPI programs.
+The first step is to connect to <tt><b>setonix</b></tt> by typing
+</p>
+
+<p><tt><b>
+ssh your_username@setonix.pawsey.org.au<br>
+</b></tt></p>
+
+<p>
+Once you have logged on, type the command <tt><b>hostname</b></tt> to learn the
+name of the login node. There are four login nodes and users are assigned on a
+round robin basis.  Normally we do not run MPI programs on the login nodes,
+as they are shared amongst many users. However, today is an exception as the 
+programs are extremely simple. Type <tt><b>who</b></tt> to see who else is 
+currently also using your login node.
+</p>
+
+<!--
+<p>
+In order to compile and run MPI programs on <tt><b>zeus</b></tt> we need to load
+a set of libraries, headers and wrapper compilers. To check if any are already
+loaded, type
+</p>
+
+<p><tt><b>
+which mpif90<br>
+which mpicc
+</b></tt></p>
+
+<p>
+according to your language preference. If none are listed, type
+</p>
+
+<p><tt><b>
+module load openmpi/2.1.2<br>
+</b></tt></p>
+
+<p>
+which loads the OpenMPI module. This module also enables <tt><b>man</b></tt>
+pages which provide useful information on syntax and error codes; type
+<tt><b>man mpi</b></tt> to get started. Note that if you logoff from
+<tt><b>zeus</b></tt> you will need to type this command again the next time 
+you log in.
+</p>
+-->
+
+<p>
+On many supercomputers we have to manually load modules to activate the MPI
+compilers, but on <tt><b>setonix</b></tt> everything is ready to go.
+This includes <tt><b>man</b></tt> pages for MPI functions, including
+syntax and error codes; type <tt><b>man mpi</b></tt> to get a sense of
+the information available. 
+</p>
+
+<!-- ********************************************************** -->
+
+<h2>Hello World</h2>
+
+<p>
+The first step in any programming language is to perform simple I/O, for which 
+the canonical example is 'Hello World'. To see how this works with MPI, 
+download one of the following files
+(<a href="hello.f90">hello.f90</a> - <a href="hello.c">hello.c</a>) or head to
+the directory <tt><b>/scratch/courses0100/lscarlett/mpi1</b></tt> and copy the 
+appropriate file to your account. It is good practice to run your MPI 
+programs in the <tt><b>/scratch</b></tt> directory, and sensible to put 
+the exercises for each lab in a separate directory. For today, this could 
+be something like <tt><b>/scratch/courses0100/your_username/mpi1</b></tt>.
+</p>
+
+<p>
+Take a look at the file you have copied across using a text pager (e.g.
+<tt><b>cat</b></tt>, 
+<tt><b>more</b></tt>, 
+<tt><b>less</b></tt>) and compile using the appropriate parallel compiler
+</p>
+
+<p><tt><b>
+ftn hello.f90<br>
+cc hello.c<br>
+</b></tt></p>
+
+<p>
+which generates an executable <tt><b>a.out</b></tt> capable of running in
+an MPI environment. To run the parallel program, type
+</p>
+
+<p><tt><b>
+srun -p work --reservation=CurtinHPCcourse2026 -A courses0100 -n 4 a.out<br>
+</b></tt></p>
+
+<p>
+where the <tt><b>-n</b></tt> flag sets the number of processes to be used
+and <tt><b>a.out</b></tt> is the executable compiled above. You should find
+that 'Hello World' appears four times on the screen; once from each process.
+Experiment by varying the number of processes. Don't be too greedy; remember
+there are other users on the system.
+</p> 
+
+<p>
+To make life easier, type the following command to setup an alias for srun
+</p>
+
+<p><tt><b>
+alias srun="srun -p work --reservation=CurtinHPCcourse2026 -A courses0100"<br>
+</b></tt></p>
+
+<!-- ********************************************************** -->
+
+<h2>Basic MPI</h2>
+
+<p>
+In lectures we saw how the MPI functions <tt><b>MPI_Comm_size</b></tt> and 
+<tt><b>MPI_Comm_rank</b></tt> are used to determine the number of MPI processes, 
+and the rank of each process, respectively.  Our first application of these 
+functions is a simple extension to the 'Hello World' program seen above.
+Download one of the following files
+(<a href="hello2.f90">hello2.f90</a> - <a href="hello2.c">hello2.c</a>)
+and compile using the appropriate compiler.  Execute the program by typing 
+<tt><b>srun -n 4 a.out</b></tt>. This should produce output along the lines of
+</p>
+
+<p><tt><b>
+Hello World.  I am process 0 <br>
+Hello World.  I am process 1 <br>
+Hello World.  I am process 2 <br>
+Hello World.  I am process 3 <br>
+</b></tt></p>
+
+<p>
+Run the program several times and try varying the number of processes.
+You might find that the order of the output varies. Can you explain why?  
+</p>
+
+<p>
+Using a UNIX text editor, modify the program to include a call to 
+<tt><b>MPI_Comm_size</b></tt> to determine the number of processes. 
+Include this information in each line of the output in the manner of
+</p>
+
+<p><tt><b>
+Hello World.  I am process 0 of 4
+</b></tt></p>
+
+<p>
+and so on for the other processes.  Test that your code works by varying the 
+number of processes passed to <tt><b>-n</b></tt>.
+</p>
+
+<p> 
+The infinite series &sum;1/<em>k</em><sup>2</sup>, where <em>k</em> is a
+positive integer, is a special case of the Riemann Zeta Function with an exact
+value of &pi;<sup>2</sup>/6.  Download one of the following serial codes (<a
+href="zeta.f90">zeta.f90</a> - <a href="zeta.c">zeta.c</a>) which calculates 
+this sum for the first 100,000 terms. Compile the program in the usual way 
+(using either <tt><b>ftn </b></tt> or <tt><b>cc</b></tt>) and run the
+executable using the command
+</p>
+
+<p><tt><b>
+./a.out
+</b></tt></p>
+
+<p>
+Note that <tt><b>srun</b></tt> is not employed since the program runs on
+a single CPU. 
+</p>
+
+<p> Modify the serial program to use MPI to determine the quantities
+&sum;1/<em>k</em><sup>2</sup>, 
+&sum;1/<em>k</em><sup>3</sup>,
+&sum;1/<em>k</em><sup>4</sup>  and
+&sum;1/<em>k</em><sup>5</sup>.
+Perform each summation on a different processes and test to check that at 
+exactly four processes are available. Each process should print both the
+value of the summation and the exact answer given in Equations 71-74 on the 
+interesting Wolfram web-site for the 
+<a href="http://mathworld.wolfram.com/RiemannZetaFunction.html">
+Riemann Zeta function</a>.  No output should be generated if four processes 
+are not specified; confirm this by varying the argument of <tt><b>-n</b></tt>.  
+</p>
+
+<!-- ********************************************************** -->
+
+<h2>Point-to-Point Communication</h2>
+
+<p>
+In lectures you saw how 
+<tt><b>MPI_Send</b></tt> and 
+<tt><b>MPI_Recv</b></tt>
+can be used to send data from one process to another.  
+Download one of the following codes
+(<a href="send.f90">send.f90</a> -
+ <a href="send.c">send.c</a>)
+and compile and run.  You can specify <tt><b>-n 2</b></tt> as only two 
+processes are required.  You should find the output is along the lines of
+</p>
+
+<p><tt><b>
+Process 0 sent the number 10<br>
+Process 1 received the number 10<br>
+</b></tt></p>
+
+<p>
+Have a close look at the code, and make sure you understand what is going on.  
+</p>
+
+<p>
+Modify the send program so that each process sends an integer 
+to the other, e.g. Process 0 sends the number 10 to Process 1, while 
+Process 1 sends the number 5 to Process 0.
+</p>
+
+<p>
+Now consider a parallel calculation with four processes.  Write a program 
+which sends an integer (say 10) around a ring in which communication 
+follows the progression 0&rarr;1, 1&rarr;2, 2&rarr;3 and 3&rarr;0.
+The process should terminate when the integer returns to Process 0.  
+Your program should produce output along the lines of 
+</p>
+
+<p><tt><b>
+Process 0 sent the number 10 <br>
+Process 1 received the number 10 <br>
+ <br>
+Process 1 sent the number 10 <br>
+Process 2 received the number 10 <br>
+ <br>
+Process 2 sent the number 10 <br>
+Process 3 received the number 10 <br>
+ <br>
+Process 3 sent the number 10 <br>
+Process 0 received the number 10 <br>
+</b></tt></p>
+
+<p>
+Generalise the code to work for an arbitrary number of processes and confirm 
+that your program continues to behave as expected. Note that in order to 
+obtain the anticipated order of output you may need to flush the output buffer 
+immediately following each 
+<tt><b>write/printf</b></tt> statement.  In Fortran this is achieved with
+<tt><b>call flush(6)</b></tt>, while the corresponding command in C is 
+<tt><b>fflush(stdout)</b></tt>. It can also help to get each process to wait for
+a second after each <tt><b>MPI_Recv</b></tt>. In Fortran this is achieved with
+<tt><b>call sleep(1)</b></tt>. The C function is named the same, but requires 
+<tt><b>#include &lt;unistd.h&gt;</b></tt>.
+</p>
+
+<!-- ********************************************************** -->
+
+<h2>Creating Deadlock</h2>
+
+<p>
+Download one of the following programs 
+(<a href="array.f90">array.f90</a> -
+ <a href="array.c">array.c</a>) in which two 
+processes send each other an array of data.  Have a look at the code, and 
+make sure you understand what is going on (the important sections are the 
+process-specific instructions).  Compile the code, and run the executable 
+on two processes.  You will see that 100 numbers are sent from Process 0 
+to Process 1, and another 100 numbers (a separate data set) are sent in the 
+reverse direction.  Now run the code again with a command-line argument such as
+</p>
+
+<p> <tt><b>
+srun -n 2 a.out 500
+</b></tt></p>
+
+<p>
+which alters the amount of data which is exchanged between the processes. 
+Explore a variety of values, from 1 real up to 4000 reals. For large values 
+you will find that the program appears to hang. In fact the program is 
+<i>deadlocked</i>, with each process waiting for the other to finish.  
+Press Ctrl-C twice quickly to cancel execution, and try a different value.  
+Continue experimenting until you determine the maximum array size which 
+won't deadlock. 
+</p>
+
+<p>
+While this behaviour is unexpected, the explanation is relatively
+straightforward.  Small messages are sent using a buffer, while large messages
+require simultaneous cooperation between the two processes.  In the former
+case, even though both processes initiate <tt><b>MPI_Send</b></tt> at much the
+same time, once the message has been copied to the system buffer, execution
+passes to the following line of code and the appropriate messages are received.
+In the case of the large messages, however, <tt><b>MPI_Send</b></tt> can't
+complete without the cooperation of a matching <tt><b>MPI_Recv</b></tt>.  Since
+both processes post <tt><b>MPI_Send</b></tt>, neither command completes and a
+deadlock condition is created.
+</p>
+
+<p>
+Having determined the critical value for deadlock, run the program again 
+with two command-line arguments, where one number is larger than the deadlock
+threshold and the other is smaller. With this format you specify separate
+array sizes for the messages sent from each process.  Consider a range of
+message sizes, and explain what you observe.
+</p>
+
+<p>
+As a final exercise, modify the array program to use double precision data
+instead of the single precision <tt><b>real</b></tt> and <tt><b>float</b></tt>.
+Does this affect the threshold at which deadlock occurs?
+</p>
+
+<!-- ********************************************************** -->
+
+<!--
+
+<h2>Latency and Bandwidth</h2>
+
+<p>
+Download the program <a href="latency.c">latency.c</a>, compile using 
+<tt><b>cc</b></tt>, and use <tt><b>srun</b></tt> to run on two processes.
+This program tests one of the basic parameters of an MPI calculation, that 
+is, the minimum time (or delay) for communication between processes.
+Conceptually the code is very simple: a single byte is set from one
+process to another, and then sent back again.  The time for this procedure
+is printed in the fourth column.  At the bottom the average value is printed
+(note that the one-way latency is half the round trip time).
+</p>
+
+<p>
+Run the executable several times, and observe how the results vary 
+between invocations.  Why do you think this happens?  The program 
+will also accept an optional command-line argument in the familiar 
+style of UNIX.  For example, if you type
+</p>
+
+<p><tt><b>
+srun -n 2 a.out 50<br>
+</b></tt></p>
+
+<p>
+the program will compute averages for 50 round-trip packets. Experiment with
+larger and smaller values.
+</p>
+
+<p>
+Another important MPI quantity is the speed of the network when transmitting 
+large amounts of data.  To measure this, download the program 
+<a href="bandwidth.c">bandwidth.c</a> and compile.  Run the executable, 
+and redirect the output to a file using the commands
+</p>
+
+<p><tt><b>
+srun -n 2 a.out > data.out
+</b></tt></p>
+
+<p>
+View the contents of the file <tt><b>data.out</b></tt> using a text pager, 
+and note how the left column indicates the size of the message being sent, 
+while the right column shows the time taken.  Scrolling to the bottom of 
+the file you will see that approximately 3 microseconds is required to send 
+a 50K message.  Within the Unix environment, the <tt><b>gnuplot</b></tt> 
+utility provides a convenient plotting environment (see access instructions 
+below, and follow <a href="../gnuplot/">this link</a> for a tutorial).
+To plot <tt><b>data.out</b></tt> as an <em>(x,y)</em> graph, type 
+<tt><b>gnuplot</b></tt> and enter the following commands at the prompt
+</p>
+
+<p><tt><b>
+ gnuplot> plot 'data.out' <br>
+ gnuplot> f(x)=m*x+b <br>
+ gnuplot> fit f(x) 'data.out' via m,b <br>
+ gnuplot> plot 'data.out', f(x) <br>
+</b></tt></p>
+
+<p>
+These commands fit a straight line to the data, and show that the time taken
+increases approximately linearly with message size.  The transfer rate (or
+bandwidth) is then the reciprocal of the slope, and is measured in 
+bytes/microsecond (or equivalently, megabytes/second).  To determine this 
+value, use the command
+</p>
+
+<p><tt><b>
+ gnuplot> print 1/m
+</b></tt></p>
+
+<p>
+There is also useful information in the y-intercept value (<tt><b>b</b></tt>), 
+which should be similar to the latency computed above.  Check that this is 
+indeed the case.
+</p>
+-->
+
+<!-- ********************************************************** -->
+
+<h2> Collective Communication</h2>
+
+<p>
+Write an MPI program in which an arbitrary number of processes (specified 
+by <tt><b>-n</b></tt>) are used to calculate the sum &sum;1/k<sup>2</sup> 
+where the summation is over all values of <em>k</em> between 1 and 100,000.  
+Calculate a partial sum with each process and use <tt><b>MPI_Reduce</b></tt> to 
+gather the results while performing a sum operation.
+Be sure to use double precision, and print the final result and the 
+percentage error relative to the exact value of &pi;<sup>2</sup>/6.  Test 
+the correctness of your program by confirming that the result is independent 
+of the number of processes.
+</p>
+
+<p>
+Using <tt><b>MPI_Barrier</b></tt>, modify the second 'Hello World' code so 
+that the output is printed out in order (i.e. 0, 1, 2, 3, ...).  Use the 
+function call <tt><b>sleep(1)</b></tt> to pause for one second between each 
+line of 
+output.  Test your solution by running the executable multiple times on a 
+large number of processes.
+</p>
+
+<p>
+Benchmark the scaling behaviour of <tt><b>MPI_Bcast</b></tt> as a function 
+of the number of processes, <em>N</em>, where <em>N</em> is 2, 4, 8 and 16.  
+To minimize the effect of latency, broadcast a large array containing tens 
+of thousands of data values.  Determine the execution time using 
+<tt><b>MPI_Wtime</b></tt>, and use a plotting program such as 
+<tt><b>gnuplot</b></tt> to produce a graph of execution time as a function 
+of <em>log<sub>2</sub>N</em>.
+</p>
+
+<p>
+Perform a 'sweetspot' calculation in which you determine the critical
+size of a message below which <tt><b>MPI_Bcast</b></tt> becomes more
+efficient than <tt><b>MPI_Scatter</b></tt>. Vary both the number of
+processes and the message size, and compare your answer to the 
+theoretical expressions given in Slide 38. Using the latency and bandwidth
+values from above, plot the two theoretical expressions using 
+<tt><b>gnuplot</b></tt> or similar, and compare the plot to your computed 
+timings.
+</p>
+
+<!-- ********************************************************** -->
+
+<h2>Further Information</h2>
+
+<p>
+There are numerous guides for MPI available online. The documents below are
+from major supercomputing centres and provide an excellent introduction.
+</p>
+
+<ul>
+     <li> <a href="../docs/mpi-epcc.pdf">Edinburgh Parallel Computing Centre</a></li>
+     <li> <a href="../docs/tutorial.html">Lawrence Livermore National Lab</a></li>
+     <li> <a href="../docs/illinois.pdf">University of Illinois</a></li>
+     <li> <a href="../docs/indiana/">Indiana University</a> </li>
+</ul>
+
+<p>
+Today we ran a number of simple tests on the login node, but in most 
+situations you should run calculations on a compute node to avoid compromising 
+the command-line performance of other users. To create a interactive
+session on a compute node type the command
+
+<p><tt><b>
+salloc --tasks=4 -p work -A courses0100 --reservation=CurtinHPCcourse2026 --time=00:10:00
+</b></tt></p>
+
+<p>
+to start a 10 minute session with 4 MPI processes. 
+Vary the argument of <tt><b>--tasks</b></tt> and <tt><b>--time</b></tt>
+according to the problem at hand.  Once the interactive session has started, 
+use <tt><b>srun</b></tt> in the usual manner. Note that you are free to
+specify fewer processes than the maximum should you choose to do so, but 
+you can't request more.  Be aware that <tt><b>setonix</b></tt> is a production 
+machine that is important for many researchers, so only request the resources 
+you need. Additionally, do not leave the interactive session idle for long 
+periods, and <tt><b>logout</b></tt> once you are finished. 
+</p>
+
+<p>
+If you wish to run <tt><b>gnuplot</b></tt> you will need to add the 
+<tt><b>-Y</b></tt> option as an additional argument to <tt><b>ssh</b></tt>. 
+This flag instructs <tt><b>ssh</b></tt> to transmit the X11 output back to 
+your display. To do this you will need to <tt><b>logout</b></tt> and login 
+again. Once you have done this, type
+</p>
+
+<p><tt><b>
+module load gnuplot/5.4.3
+</b></tt></p>
+
+<p>
+to activate the relevant paths and libraries. Note that <tt><b>gnuplot</b></tt>
+only works remotely over X11, so if you don't have an X11 client on your 
+machine you will need to use another plotting program.
+</p>
+
+<!-- 
+
+<p>
+Finally, if you get stuck with conflicting modules and cannot figure out how 
+to get a working MPI environment, type the command
+</p>
+
+<p><tt><b>
+module purge
+</b></tt></p>
+
+<p>
+which removes all of the modules. Next, type the following five commands, four
+of which are automatically run by default in the standard Pawsey setup
+</p>
+
+<p><tt><b>
+module load pawseytools <br>
+module load slurm       <br>
+module load gcc         <br>
+module load sandybridge <br>
+module load openmpi
+</b></tt></p>
+
+<p>
+If you want to know more about the <tt><b>module</b></tt> command and its 
+options, type
+</p>
+
+<p><tt><b>
+module help
+</b></tt></p>
+
+-->
+
+</body>
+</html>
+
