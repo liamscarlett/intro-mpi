@@ -129,6 +129,14 @@ appears in the remainder of this and the next workshop materials, it is assumed 
 alias has been set.
 </p>
 
+<p>
+The <b><tt>srun</tt></b> command runs the program on a compute node, which means there is a delay between
+executing <b><tt>srun</tt></b> and the program running, as the scheduling system processes the job.
+To verify that this is the case, enter the command <b><tt>hostname</tt></b> to print the name of the
+login node, then enter <b><tt>srun hostname</tt></b> to run the <b><tt>hostname</tt></b> command on a compute node,
+and therefore print the name of the compute node.
+</p>
+
 <!-- ********************************************************** -->
 
 <h2>Basic MPI</h2>
@@ -187,7 +195,9 @@ executable using the command
 
 <p>
 Note that <tt><b>srun</b></tt> is not employed since the program runs on
-a single CPU. 
+a single CPU. <b>Warning:</b> running without <b><tt>srun</tt></b> means that the program is
+executed on the login node, which is generally <b>bad!</b> You can only get
+away with this occasionally for small, single-core programs.
 </p>
 
 <p> Modify the serial program to use MPI to determine the quantities
@@ -472,10 +482,10 @@ from major supercomputing centres and provide an excellent introduction.
 </ul>
 
 <p>
-Today we ran a number of simple tests on the login node, but in most 
-situations you should run calculations on a compute node to avoid compromising 
-the command-line performance of other users. To create a interactive
-session on a compute node type the command
+Today we ran a number of simple tests either directly on the login node, or by running 
+<b><tt>srun</tt></b> from the login node.
+It is also possible to create a interactive
+session on a compute node by typing the command
 
 <p><tt><b>
 salloc --tasks=4 -p work -A courses0100 --reservation=CurtinHPCcourse2026 --time=00:10:00
