@@ -101,12 +101,15 @@ an MPI environment. To run the parallel program, type
 </p>
 
 <p><tt><b>
-srun -p work --reservation=CurtinHPCcourse2026 -A courses0100 -n 4 ./main<br>
+srun -u -p work --reservation=CurtinHPCcourse2026 -A courses0100 -n 4 ./main<br>
 </b></tt></p>
 
 <p>
 where the <tt><b>-n</b></tt> flag sets the number of processes to be used
-and <tt><b>main</b></tt> is the executable compiled above. You should find
+and <tt><b>main</b></tt> is the executable compiled above. 
+The <tt><b>-u</b></tt> flag sets unbuffered output – useful if you're watching the program run in real time.
+<br>
+You should find
 that 'Hello World' appears four times on the screen; once from each process.
 Experiment by varying the number of processes. Don't be too greedy; remember
 there are other users on the system.
@@ -117,8 +120,14 @@ To make life easier, type the following command to setup an alias for srun
 </p>
 
 <p><tt><b>
-alias srun="srun -p work --reservation=CurtinHPCcourse2026 -A courses0100"<br>
+alias srun="srun -u -p work --reservation=CurtinHPCcourse2026 -A courses0100"<br>
 </b></tt></p>
+
+<p>
+You can add this to your <b><tt>.bashrc</tt></b> (or equivalent) file. Anywhere <b><tt>srun</tt></b> 
+appears in the remainder of this and the next workshop materials, it is assumed that the 
+alias has been set.
+</p>
 
 <!-- ********************************************************** -->
 
