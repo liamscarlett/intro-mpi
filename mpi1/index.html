@@ -254,30 +254,46 @@ Your program should produce output along the lines of
 </p>
 
 <p><tt><b>
-Process 0 sent the number 10 <br>
-Process 1 received the number 10 <br>
+Process 0 sent the number 10 to process 1<br>
+Process 1 received the number 10 from process 0<br>
  <br>
-Process 1 sent the number 10 <br>
-Process 2 received the number 10 <br>
+Process 1 sent the number 10 to process 2<br>
+Process 2 received the number 10 from process 1<br>
  <br>
-Process 2 sent the number 10 <br>
-Process 3 received the number 10 <br>
+Process 2 sent the number 10 to process 3<br>
+Process 3 received the number 10 from process 2<br>
  <br>
-Process 3 sent the number 10 <br>
-Process 0 received the number 10 <br>
+Process 3 sent the number 10 to process 0<br>
+Process 0 received the number 10 from process 3<br>
 </b></tt></p>
 
 <p>
 Generalise the code to work for an arbitrary number of processes and confirm 
-that your program continues to behave as expected. Note that in order to 
+that your program continues to behave as expected.
+<br>
+Some hints:
+<ol>
+  <li> Define integers <b><tt>source</tt></b> and <b><tt>dest</tt></b>. 
+    For each rank, the source should be rank-1 and dest should be rank+1, with exceptions 
+    for the first and last ranks. <!--The <b><tt>modulo</tt></b> function can be very useful here.-->
+  <li> Rank 0 needs to start the chain by posting a <b><tt>send</b></tt>, and follow that by posting
+    a <b><tt>recv</b></tt> to receive the number from the last rank. Every other rank needs to post
+    a <b><tt>recv</b></tt> first and then a <b><tt>send</b></tt>. 
+  <li> In order to obtain the anticipated output order it helps to get each process to wait for
+    a second after each <tt><b>MPI_Recv</b></tt>. In Fortran this is achieved with
+    <tt><b>call sleep(1)</b></tt>. The C function is named the same, but requires 
+    <tt><b>#include &lt;unistd.h&gt;</b></tt>.
+
+</ol>
+
+
+
+<!--Note that in order to 
 obtain the anticipated order of output you may need to flush the output buffer 
 immediately following each 
 <tt><b>write/printf</b></tt> statement.  In Fortran this is achieved with
 <tt><b>call flush(6)</b></tt>, while the corresponding command in C is 
-<tt><b>fflush(stdout)</b></tt>. It can also help to get each process to wait for
-a second after each <tt><b>MPI_Recv</b></tt>. In Fortran this is achieved with
-<tt><b>call sleep(1)</b></tt>. The C function is named the same, but requires 
-<tt><b>#include &lt;unistd.h&gt;</b></tt>.
+<tt><b>fflush(stdout)</b></tt>. -->
 </p>
 
 <!-- ********************************************************** -->
