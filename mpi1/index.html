@@ -91,22 +91,22 @@ Take a look at the file you have copied across using a text pager (e.g.
 </p>
 
 <p><tt><b>
-ftn hello.f90<br>
-cc hello.c<br>
+ftn hello.f90 -o main<br>
+cc hello.c -o main<br>
 </b></tt></p>
 
 <p>
-which generates an executable <tt><b>a.out</b></tt> capable of running in
+which generates an executable <tt><b>main</b></tt> capable of running in
 an MPI environment. To run the parallel program, type
 </p>
 
 <p><tt><b>
-srun -p work --reservation=CurtinHPCcourse2026 -A courses0100 -n 4 a.out<br>
+srun -p work --reservation=CurtinHPCcourse2026 -A courses0100 -n 4 ./main<br>
 </b></tt></p>
 
 <p>
 where the <tt><b>-n</b></tt> flag sets the number of processes to be used
-and <tt><b>a.out</b></tt> is the executable compiled above. You should find
+and <tt><b>main</b></tt> is the executable compiled above. You should find
 that 'Hello World' appears four times on the screen; once from each process.
 Experiment by varying the number of processes. Don't be too greedy; remember
 there are other users on the system.
@@ -132,7 +132,7 @@ functions is a simple extension to the 'Hello World' program seen above.
 Download one of the following files
 (<a href="hello2.f90">hello2.f90</a> - <a href="hello2.c">hello2.c</a>)
 and compile using the appropriate compiler.  Execute the program by typing 
-<tt><b>srun -n 4 a.out</b></tt>. This should produce output along the lines of
+<tt><b>srun -n 4 ./main</b></tt>. This should produce output along the lines of
 </p>
 
 <p><tt><b>
@@ -173,7 +173,7 @@ executable using the command
 </p>
 
 <p><tt><b>
-./a.out
+./main
 </b></tt></p>
 
 <p>
@@ -278,7 +278,7 @@ reverse direction.  Now run the code again with a command-line argument such as
 </p>
 
 <p> <tt><b>
-srun -n 2 a.out 500
+srun -n 2 ./main 500
 </b></tt></p>
 
 <p>
@@ -343,7 +343,7 @@ style of UNIX.  For example, if you type
 </p>
 
 <p><tt><b>
-srun -n 2 a.out 50<br>
+srun -n 2 ./main 50<br>
 </b></tt></p>
 
 <p>
@@ -359,7 +359,7 @@ and redirect the output to a file using the commands
 </p>
 
 <p><tt><b>
-srun -n 2 a.out > data.out
+srun -n 2 ./main > data.out
 </b></tt></p>
 
 <p>
