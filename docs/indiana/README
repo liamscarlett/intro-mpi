@@ -1,0 +1,20 @@
+***************************************
+* Tutorial from the developers of LAM *
+***************************************
+
+part1.pdf: "Introduction"
+   - Basics of Parallel Computing
+   - Six-function MPI
+   - Point-to-Point Communications
+   - Collective Communication
+
+part2.pdf: "High-Performance MPI"
+   - Non-blocking Communcation
+   - Persistent Communication
+   - User-defined datatypes
+   - MPI Idioms for High-performance
+
+part3.pdf: "Advanced Topics"
+   - Communicators
+   - SGi Origin specifics
+   - IBM SP specifics
