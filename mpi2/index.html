@@ -14,9 +14,13 @@
 
 <p>
 Today you will explore non-blocking communication and master/worker
-parallelism with MPI. Some of the examples require image rendering,
-for which the simplest approach uses X11 forwarding. Start by connecting
-to <tt><b>setonix</b></tt> by typing
+parallelism with MPI. The <a href="#assignment">assignment</a> 
+requires you to be able to view  <a href="https://www.cs.swarthmore.edu/~soni/cs35/f12/Labs/extras/01/ppm_info.html">PPM</a>
+image files generated on Setonix.
+
+One approach uses X11 forwarding to render to image directly from the remote
+machine without copying it to your local machine. 
+Start by connecting to <tt><b>setonix</b></tt> by typing
 </p>
 
 <p><tt><b>
@@ -25,9 +29,7 @@ ssh -Y your_username@setonix.pawsey.org.au<br>
 
 <p>
 where the <tt><b>-Y</b></tt> flag instructs <tt><b>ssh</b></tt> to transmit 
-the X11 output back to your display. If you do not have an X11 client on your 
-computer, you will need to use <tt><b>sftp</b></tt> or similar to transfer 
-files back to your computer for rendering with an image viewer.  Note that 
+the X11 output back to your display. 
 MacOS users have the option to install the free 
 <a href="http://www.xquartz.org">Xquartz</a> package. Windows users should
 connect via <a href="https://mobaxterm.mobatek.net/">MobaXterm</a> which 
@@ -36,15 +38,15 @@ has built-in support for X11.
 
 <p>
 To test that X11 forwarding is working correctly, <tt><b>cd</b></tt> to the 
-directory <tt><b>/scratch/courses0100/lscarlett/mpi2</b></tt> and type the command
+directory <tt><b>/software/projects/courses0100</b></tt> and type the command
 </p>
 
 <p><tt><b>
-./xiv sample.ppm
+./xiv mandelbrot.ppm
 </b></tt></p>
 
 <p>
-A window should appear showing a photo taken at Curtin. Use "+" and "-" on the
+A window should appear showing a render of the Mandelbrot set. Use "+" and "-" on the
 keyboard to zoom, and press the arrow keys to move around the image once zoomed
 in. Press "q" to quit. To learn more about the functionality of this simple 
 image viewer, type
@@ -60,12 +62,22 @@ make this easier, setup an alias by typing
 </p>
 
 <p><tt><b>
-alias xiv="/scratch/courses0100/lscarlett/mpi2/xiv"
+alias xiv="/software/projects/courses0100/xiv"
 </b></tt></p>
 
 <p>
-Test that your alias works by copying <tt><b>sample.ppm</b></tt> to your
-home directory and running <tt><b>xiv sample.ppm</b></tt> from there.
+Test that your alias works by copying <tt><b>mandelbrot.ppm</b></tt> to your
+home directory and running <tt><b>xiv mandelbrot.ppm</b></tt> from there.
+</p>
+
+<p>
+If you are unable to get <tt><b>xiv</b></tt> working through X11 
+(e.g. XQuartz is having some issues on recent versions of MacOS), or if you are finding
+it too slow, you may find it easier to just <tt><b>scp</b></tt> the image files to your local
+machine and open them there. If you go down this road, please make sure you are able to open
+<tt><b>.ppm</b></tt> files on your computer (the default document viewer Preview on MacOS can
+open <tt><b>.ppm</b></tt> files). Copy the <tt><b>mandelbrot.ppm</b></tt> file to your
+computer and make sure you are able to open it.
 </p>
 
 <p>
@@ -75,7 +87,7 @@ typing
 </p>
 
 <p><tt><b>
-man MPI_RECV
+man MPI_Recv
 </b></tt></p>
 
 <p>
@@ -85,6 +97,15 @@ are available for all MPI routines. Look up a few, and test your memory
 to see how many functions you can remember from last week.
 </p>
 
+<p>
+As was the case last session,
+note that all source files are also available via git: 
+</p>
+<p>
+<tt><b>git clone https://github.com/liamscarlett/intro-mpi</b></tt>.
+</p>
+
+
 <!-- ********************************************************** -->
 
 <h2>Non-Blocking Communication</h2>
@@ -92,16 +113,13 @@ to see how many functions you can remember from last week.
 <p>
 In the first MPI laboratory you were provided with a simple piece
 of code which used the standard blocking send
-(<tt><b>MPI_SEND</b></tt> and <tt><b>MPI_RECV</b></tt>)
+(<tt><b>MPI_Send</b></tt> and <tt><b>MPI_Recv</b></tt>)
 to pass a single integer from Process 0 to Process 1.
 Download this code (<a href="../mpi1/send.f90">send.f90</a> -
  <a href="../mpi1/send.c">send.c</a>)
 and modify the program to perform non-blocking
 (non-blocking) communication using
-<tt><b>MPI_ISEND/MPI_IRECV/MPI_WAIT</b></tt>. As was the case last session,
-note that all source files are also available in the directory
-<tt><b>/scratch/courses0100/lscarlett</b></tt>.
-</p>
+<tt><b>MPI_Isend/MPI_Irecv/MPI_Wait</b></tt>. 
 
 <p>
 Last session you explored the deadlock condition between two processes. 
@@ -109,16 +127,19 @@ Small messages were transmitted via a buffer, but when both arrays exceeded
 a critical size a deadlock state arose.  Download the array program from the 
 previous laboratory 
 (<a href="../mpi1/array.f90">array.f90</a> -
- <a href="../mpi1/array.c">array.c</a>)
-and modify the code to perform non-blocking communication using
-<tt><b>MPI_ISEND/MPI_IRECV/MPI_WAITALL</b></tt>.  Show that this avoids 
-deadlock by running the code with 400KB messages as follows
+ <a href="../mpi1/array.c">array.c</a>).
+To remind yourself of the deadlock state, compile and run it with a 400KB message
+as follows
 (note that a real/float occupies four bytes of memory).
+<p>
+<tt><b>srun -n 2 main 100000</b></tt>
 </p>
- 
-<p><tt><b>
-srun -n 2 a.out 100000
-</b></tt></p>
+
+<p>
+Now modify the code to perform non-blocking communication using
+<tt><b>MPI_Isend/MPI_Irecv/MPI_Waitall</b></tt>.  Show that this avoids 
+deadlock by running the code with 400KB messages.
+</p>
 
 <p>
 Your next task is to write a two-process program which performs computation 
@@ -130,15 +151,15 @@ structure:<br><br>
 <td> 
 <em>On Process 0</em>:<br><br>
 Use
-<tt><b>MPI_ISEND</b></tt> to send 3 million reals/floats
-to Process 1. Once <tt><b>ISEND</b></tt> is posted, 
+<tt><b>MPI_Isend</b></tt> to send 3 million reals/floats
+to Process 1. Once <tt><b>Isend</b></tt> is posted, 
 the program should enter a while loop which<br>
 &nbsp; 
   a) increments a counter (initially set equal to zero) <br>
 &nbsp;
-b) uses <tt><b>MPI_TEST</b></tt> to see if the 
-   <tt><b>ISEND</b></tt> has completed. <br><br>
-Exit the while loop when <tt><b>ISEND</b></tt> is done,
+b) uses <tt><b>MPI_Test</b></tt> to see if the 
+   <tt><b>Isend</b></tt> has completed. <br><br>
+Exit the while loop when <tt><b>Isend</b></tt> is done,
 and then print out the value of the counter.
 </td>
 
@@ -146,7 +167,7 @@ and then print out the value of the counter.
 <em>On Process 1</em>:<br><br>
 
 Accept the message from Process 0 using a blocking 
-receive (<tt><b>MPI_RECV</b></tt>). <br><br>
+receive (<tt><b>MPI_Recv</b></tt>). <br><br>
 
 Once the message has arrived, print out the last
 data value received.
@@ -158,17 +179,12 @@ data value received.
 
 <p>
 Compile the program and run several times. You should find that approximately
-500,000 iterations are performed during the <tt><b>ISEND</b></tt> operation.  
+500,000 iterations are performed during the <tt><b>Isend</b></tt> operation.  
 Now reduce the size of message sent (e.g. consider 10<sup>5</sup> or 
 10<sup>4</sup> values).  What happens? What are the implications for 
 overlapping communication and computation?
 </p>
 
-<p>
-Modify your program to use a non-blocking receive, and include in the code 
-for Process 1 a second while loop which also increments a counter. How many 
-iterations can you perform while the <tt><b>MPI_IRECV</b></tt> is executing? 
-</p> 
 
 <!-- ********************************************************** -->
 
@@ -177,13 +193,13 @@ iterations can you perform while the <tt><b>MPI_IRECV</b></tt> is executing?
 Download once again the deadlock program from last session
 (<a href="../mpi1/array.f90">array.f90</a> -
  <a href="../mpi1/array.c">array.c</a>)
-and replace both <tt><b>MPI_SEND</b></tt> calls with <tt><b>MPI_SSEND</b></tt>.
+and replace both <tt><b>MPI_Send</b></tt> calls with <tt><b>MPI_Ssend</b></tt>.
 Compile and run, and exchange a single number between the processes using the 
 command-line argument
 </p>
 
 <p><tt><b>
-  srun -n 2 a.out 1
+  srun -n 2 ./main 1
 </b></tt></p>
 
 <p>
@@ -193,8 +209,8 @@ explicitly precludes the use of any kind of buffer.
 </p>
 
 <p> 
-Now replace one of the <tt><b>MPI_SSEND</b></tt> calls with 
-<tt><b>MPI_SEND</b></tt> as used in the original version.  Run the program 
+Now replace one of the <tt><b>MPI_Ssend</b></tt> calls with 
+<tt><b>MPI_Send</b></tt> as used in the original version.  Run the program 
 with two command-line arguments in order to control the size of both messages.
 Under some conditions the code will not deadlock. Explain what you find.
 </p>
@@ -213,7 +229,7 @@ use the command-line arguments
 </p>
 
 <p><tt><b>
-  srun -n 2 a.out 0 10 0
+  srun -n 2 ./main 0 10 0
 </b></tt></p>
 
 <p>
@@ -221,7 +237,7 @@ while Fortran users should invoke
 </p>
 
 <p><tt><b>
-  srun -n 2 a.out 1 10 1
+  srun -n 2 ./main 1 10 1
 </b></tt></p>
 
 <p>
@@ -230,9 +246,9 @@ with the exact size and location of the message determined
 by the command-line arguments.  Note that both arrays are
 fixed in length and contain ten integers.  The meaning of the 
 three arguments are (in order): 
-starting position for <tt><b>MPI_SEND</b></tt>,
-number of elements for <tt><b>MPI_SEND</b></tt>, and
-receive position for <tt><b>MPI_RECV</b></tt>.
+starting position for <tt><b>MPI_Send</b></tt>,
+number of elements for <tt><b>MPI_Send</b></tt>, and
+receive position for <tt><b>MPI_Recv</b></tt>.
 Inspect the code to see how this is implemented.
 </p>
 
@@ -303,7 +319,7 @@ discretises the complex region
 iterations required to reach the condition |z|&gt;2, with an upper bound 
 of 1000 iterations.  The number of iterations is converted into false colour 
 and written to an image file <tt><b>mandelbrot.ppm</b></tt>.  Compile the 
-program in the usual way, run the executable by typing <tt><b>./a.out</b></tt>,
+program in the usual way, run the executable by typing <tt><b>./main</b></tt>,
 and wait for about 20 seconds.  To view the image, type
 </p>
 
@@ -382,6 +398,15 @@ parallelization of the Mandelbrot problem:
      as Task 1 when the chunksize is one-tenth of the total amount of work.  
      <br><br>
 
+     Your code should work even when the chunksize does not evenly divide N*N.
+     However, it is perfectly acceptable for this task to allow one of your workers
+     to work on pixels outside the bounds of the main pixel grid to allow all workers
+     to be given chunks of equal size. All that matters is that those out-of-bounds pixels
+     are not printed to the image file, and that your solution does not suffer from 
+     memory-access faults. Compile your C code with the extra flags
+     <b><tt>-g -fsanitize=address</tt></b> to check for memory access faults.
+     <br><br>
+
      <em>
      Note: Do not use <tt><b>MPI_GATHER</b></tt> or any other type of 
      collective communication for Task 2.</em>
@@ -417,7 +442,7 @@ The report should be precise, understandable and concise. It should include
 a combination of written responses, timing data, graphical representations 
 of key concepts (load balancing, communication cost, wait times, etc) and 
 code. For the load balancing questions, be sure to include graphs that
-resemble Slide 20 in Lecture 2.
+resemble the example on the "Timing Visualisation slide in Lecture 2.
 Take care to answer all questions and address all requests for 
 comment and comparison.  Include all code fragments that are essential 
 to understand the logical flow, but there is no need to repetitively include
